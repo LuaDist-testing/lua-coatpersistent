@@ -58,5 +58,5 @@ error_like( [[Person.find(true)]],
             "bad argument #2 to find %(number or string expected%)" )
 
 error_like( [[Person.find_by_sql "syntax error"]],
-            'LuaSQL: near "syntax": syntax error' )
+            'near "syntax": syntax error' )
 

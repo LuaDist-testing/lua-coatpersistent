@@ -1,7 +1,7 @@
 package = 'lua-CoatPersistent'
 version = '@version@-@rev@'
 source = {
-    url = 'http://cloud.github.com/downloads/fperrad/lua-CoatPersistent/lua-coatpersistent-@version@.tar.gz',
+    url = 'http://sites.google.com/site/fperrad/lua-coatpersistent-@version@.tar.gz',
     md5 = '@md5@',
     dir = 'lua-CoatPersistent-@version@',
 }
@@ -19,14 +19,16 @@ description = {
 dependencies = {
     'lua >= 5.1',
     'luasql-sqlite3 >= 2.2.0',
+--    'lsqlite3 >= 0.7',
     'dado >= 1.2.0',
-    'lua-coat >= 0.8.6',
+    'lua-coat >= 0.9.0',
     'lua-testmore >= 0.2.3',
 }
 build = {
     type = 'builtin',
     modules = {
-        ['Coat.Persistent']         = 'src/Coat/Persistent.lua',
+        ['Coat.Persistent']             = 'src/Coat/Persistent.lua',
+        ['Coat.Persistent.lsqlite3']    = 'src/Coat/Persistent/lsqlite3.lua',
     },
     copy_directories = { 'doc', 'test' },
 }

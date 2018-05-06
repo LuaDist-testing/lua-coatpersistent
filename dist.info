@@ -1,6 +1,6 @@
 
 name = "lua-coatpersistent"
-version = "0.1.2"
+version = "0.2.0"
 
 desc = "an ORM for lua-Coat"
 author = "Francois Perrad"
@@ -11,5 +11,5 @@ maintainer = "Francois Perrad"
 depends = {
     "lua ~> 5.1",
     "dado >= 1.2.0",
-    "lua-coat >= 0.8.6",
+    "lua-coat >= 0.9.0",
 }

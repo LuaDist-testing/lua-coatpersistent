@@ -2,23 +2,24 @@
 LUA     := lua
 VERSION := $(shell cd src && $(LUA) -e "m = require [[Coat.Persistent]]; print(m._VERSION)")
 TARBALL := lua-coatpersistent-$(VERSION).tar.gz
-ifndef REV
-  REV   := 1
-endif
+REV     := 1
 
 LUAVER  := 5.1
 PREFIX  := /usr/local
 DPREFIX := $(DESTDIR)$(PREFIX)
 LIBDIR  := $(DPREFIX)/share/lua/$(LUAVER)
+INSTALL := install
 
-all: dist.cmake
+all:
 	@echo "Nothing to build here, you can just make install"
 
 install:
-	cp src/Coat/Persistent.lua      $(LIBDIR)/Coat
+	$(INSTALL) -m 644 -D src/Coat/Persistent.lua            $(LIBDIR)/Coat/Persistent.lua
+	$(INSTALL) -m 644 -D src/Coat/Persistent/lsqlite3.lua   $(LIBDIR)/Coat/Persistent/lsqlite3.lua
 
 uninstall:
 	rm -f $(LIBDIR)/Coat/Persistent.lua
+	rm -f $(LIBDIR)/Coat/Persistent/lsqlite3.lua
 
 manifest_pl := \
 use strict; \
@@ -67,10 +68,7 @@ tag:
 doc:
 	git read-tree --prefix=doc/ -u remotes/origin/gh-pages
 
-dist.cmake:
-	wget https://raw.github.com/LuaDist/luadist/master/dist.cmake
-
-MANIFEST: doc dist.cmake
+MANIFEST: doc
 	git ls-files | perl -e '$(manifest_pl)' > MANIFEST
 
 $(TARBALL): MANIFEST
@@ -102,6 +100,7 @@ check: test
 
 test:
 	cd src && prove --exec=$(LUA) ../test/*.t
+	cd src && prove --exec="$(LUA) -l Coat.Persistent.lsqlite3" ../test/*.t
 
 coverage:
 	rm -f src/luacov.stats.out src/luacov.report.out
@@ -116,7 +115,6 @@ clean:
 	rm -f MANIFEST *.bak *.db src/luacov.*.out src/*.db src/*.png test/*.png *.rockspec README.html
 
 realclean: clean
-	rm -f dist.cmake
 
 .PHONY: test rockspec CHANGES dist.info
 

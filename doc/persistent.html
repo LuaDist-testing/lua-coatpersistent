@@ -47,7 +47,13 @@
         <li><a href="persistent.html#examples">Examples</a></li>
       </ul>
     </li>
-    <li><a href="http://luaforge.net/projects/lua-coatpersistent/">Project</a>
+    <li><a href="lsqlite3.html">module <code>C.P.lsqlite3</code></a>
+      <ul>
+        <li><a href="lsqlite3.html#reference">Reference</a></li>
+        <li><a href="lsqlite3.html#examples">Examples</a></li>
+      </ul>
+    </li>
+    <li><a href="http://fperrad.github.io/lua-CoatPersistent/">Project</a>
       <ul>
         <li><a href="http://github.com/fperrad/lua-CoatPersistent/">Git</a></li>
         <li><script type="text/javascript" src="http://www.ohloh.net/p/483941/widgets/project_thin_badge.js"></script></li>
@@ -58,7 +64,7 @@
 
 <div id="content">
 
-<h2><a name="reference"></a>References</h2>
+<h2><a name="reference"></a>Reference</h2>
 
 <h3>Global Functions</h3>
 
@@ -66,7 +72,7 @@
 
 <p>Create a Coat Persistent class as a standard Lua module.</p>
 <p>The default <code>primary_key</code> is <code>id</code>.</p>
-<p>The default <code>table_name</code> is <code>modname</code> with lower case and 
+<p>The default <code>table_name</code> is <code>modname</code> with lower case and
 <code>.</code> replaced by <code>_</code>.</p>
 
 <h3>Functions in the <em>built Class</em></h3>
@@ -151,8 +157,8 @@ conn:execute(Person.sql_create)
 <pre class="example">
 Person.create { name = 'John', age = 23 }
 Person.create {
-    { name = 'Brenda', age = 31 }, 
-    { name = 'Nate', age = 34 }, 
+    { name = 'Brenda', age = 31 },
+    { name = 'Nate', age = 34 },
     { name = 'Dave', age = 29 },
 }
 

@@ -4,15 +4,16 @@
 --
 
 local ipairs = ipairs
+local pairs = pairs
 local rawget = rawget
 local rawset  = rawset
-local require = require
 local setmetatable = setmetatable
 local type = type
 local _G = _G
 local Coat = require 'Coat'
 local Meta = require 'Coat.Meta.Class'
 local dado = require 'dado.sql'
+local sqlite3 = require 'lsqlite3'
 
 local error = Coat.error
 local argerror = Coat.argerror
@@ -28,32 +29,22 @@ local _M = {}
 local drv = {}
 local cnx = {}
 
-local function establish_connection (class, driver, ...)
-    local function create_db_sequence_tables (conn)
-        if not conn:execute "select count(*) from db_sequence_state" then
-            local r, msg = conn:execute "create table db_sequence_state (dataset varchar(50), state_id int(11))"
-            if not r then
-                error(msg)
-            end
-        end
-    end --  create_db_sequence_tables
-
+local function establish_connection (class, driver, fname)
+    driver = driver or 'sqlite3'
     drv[class] = driver
     local conn = cnx[driver]
     if not conn then
-        local luasql = require('luasql.' .. driver)
-        local env = luasql[driver]()
-        if not env then
-            error("cannot create an environment for " .. driver)
+        local err, msg
+        if fname then
+            conn, err, msg = sqlite3.open(fname)
+        else
+            conn, err, msg = sqlite3.open_memory()
         end
-        local msg
-        conn, msg = env:connect(...)
         if not conn then
             error(msg)
         end
         cnx[driver] = conn
     end
-    create_db_sequence_tables(conn)
     return conn
 end
 _M.establish_connection = establish_connection
@@ -72,29 +63,19 @@ local function execute (class, sql)
     if not conn then
         error("No connection for class " .. class._NAME)
     end
-    local r, msg = conn:execute(sql)
-    if not r then
-        error(msg)
+    local r = conn:exec(sql)
+    if r ~= sqlite3.OK then
+        error(r)
     end
     return r
 end
 
 local function next_id (class)
-    local dataset = class._TABLE_NAME
-    local cond = dado.AND { dataset = dataset }
-    local cur = execute(class, dado.select('*', 'db_sequence_state', cond))
-    local row = cur:fetch({}, 'a')
-    if not row then
-        local id_1 = 1
-        execute(class, dado.insert('db_sequence_state', { dataset = dataset, state_id = id_1 }))
-        return id_1
-    else
-        local id = row.state_id
-        local id_1 = id + 1
-        local cond = dado.AND { dataset = dataset, state_id = id }
-        execute(class, dado.update('db_sequence_state', { state_id = id_1 }, cond))
-        return id_1
+    local conn = cnx[drv[class]]
+    if not conn then
+        error("No connection for class " .. class._NAME)
     end
+    return 1 + conn:last_insert_rowid()
 end
 
 local function attributes (class)
@@ -166,15 +147,22 @@ end
 _M.create = create
 
 local function find_by_sql (class, sql)
-    local cur = execute(class, sql)
-    return function ()
-        local row = cur:fetch({}, 'a')
+    local trace = _M.trace
+    if trace then
+        trace('#', sql)
+    end
+    local conn = cnx[drv[class]]
+    if not conn then
+        error("No connection for class " .. class._NAME)
+    end
+    local f, s = conn:nrows(sql)
+    return function (_, var)
+        local row = f(s, var)
         if row then
             local obj = class.new(row)
             rawset(obj, '_db_exist', true)
             return obj
         else
-            cur:close()
             return nil
         end
     end
@@ -325,6 +313,8 @@ function _G.persistent (modname, options)
     has(M, primary_key, { is = 'rw', isa = 'number' })
     setfenv(2, M)
 end
+
+_G.package.loaded['Coat.Persistent'] = _M
 
 _M._VERSION = "0.2.0"
 _M._DESCRIPTION = "lua-CoatPersistent : an ORM for lua-Coat"
