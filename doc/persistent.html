@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Module Coat.Persistent</title>
+    <link rel="stylesheet" href="http://www.keplerproject.org/doc.css" type="text/css"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta http-equiv="Author" content="Fran&ccedil;ois Perrad"/>
+  <meta http-equiv="Language" content="en"/>
+  <meta http-equiv="Description" content="Module Coat.Persistent"/>
+  <meta http-equiv="Keywords" content="lua, coat, persistent, connection, create, delete, establish_connection, find, find_by_sql, has_p, save"/>
+</head>
+
+<body>
+
+<div id="container">
+
+<div id="product">
+  <div id="product_logo">
+    <a href="http://www.lua.org">
+      <img alt="Lua" src="http://www.andreas-rozek.de/Lua/Lua-Logo_128x128.png"/>
+    </a>
+  </div>
+  <div id="product_name"><big><strong>lua-CoatPersistent</strong></big></div>
+  <div id="product_description">an ORM for lua-Coat</div>
+</div> <!-- id="product" -->
+
+<div id="main">
+
+<div id="navigation">
+<h1>Coat.Persistent</h1>
+  <ul>
+    <li><a href="index.html">Home</a>
+      <ul>
+        <li><a href="index.html#overview">Overview</a></li>
+        <li><a href="index.html#status">Status</a></li>
+        <li><a href="index.html#documentation">Documentation</a></li>
+        <li><a href="index.html#download">Download</a></li>
+        <li><a href="index.html#installation">Installation</a></li>
+        <li><a href="index.html#test">Test</a></li>
+        <li><a href="index.html#license">License</a></li>
+      </ul>
+    </li>
+    <li><strong>module C.Persistent</strong>
+      <ul>
+        <li><a href="persistent.html#reference">Reference</a></li>
+        <li><a href="persistent.html#examples">Examples</a></li>
+      </ul>
+    </li>
+    <li><a href="http://luaforge.net/projects/lua-coatpersistent/">Project</a>
+      <ul>
+        <li><a href="http://github.com/fperrad/lua-CoatPersistent/">Git</a></li>
+        <li><script type="text/javascript" src="http://www.ohloh.net/p/483941/widgets/project_thin_badge.js"></script></li>
+      </ul>
+    </li>
+  </ul>
+</div> <!-- id="navigation" -->
+
+<div id="content">
+
+<h2><a name="reference"></a>References</h2>
+
+<h3>Global Functions</h3>
+
+<h4><code>persistent( modname, [ { primary_key = val, table_name = val } ] )</code></h4>
+
+<p>Create a Coat Persistent class as a standard Lua module.</p>
+<p>The default <code>primary_key</code> is <code>id</code>.</p>
+<p>The default <code>table_name</code> is <code>modname</code> with lower case and 
+<code>.</code> replaced by <code>_</code>.</p>
+
+<h3>Functions in the <em>built Class</em></h3>
+
+<h4><code>create( args )</code></h4>
+
+<p>Instanciates and saves and returns an object or an array of object.</p>
+
+<h4><code>connection()</code></h4>
+
+<p>Returns the current LuaSQL connection object.</p>
+
+<h4><code>obj:delete()</code></h4>
+
+<p>Deletes the object.</p>
+
+<h4><code>establish_connection( driver, options, ... )</code></h4>
+
+<p>Create and returns an connection using the LuaSQL <code>driver</code>.
+<code>options</code> are forwarded to the LuaSQL method <code>env:conn()</code>.</p>
+
+<h4><code>find()</code></h4>
+
+<p>Returns an iterator over all records.</p>
+
+<h4><code>find( id )</code></h4>
+
+<p>Returns an iterator over record with the primary key is the number <code>id</code>.</p>
+
+<h4><code>find( condition )</code></h4>
+
+<p>Returns an iterator over record selected by the SQL <code>condition</code>.</p>
+
+<h4><code>find_by_<em>name</em>( val )</code></h4>
+
+<p>Returns an iterator over record with the attribute <code>name</code> is
+<code>val</code>.</p>
+
+<h4><code>find_by_sql( sql )</code></h4>
+
+<p>Returns an iterator over record found by a raw SQL <code>select</code> request.</p>
+
+<h4><code>has_p.name = { options }</code></h4>
+
+<p>Adds a persistent attribute <code>name</code>, all options are forwarded to
+<code>Coat.has</code>.</p>
+
+<p>And adds a method <code>find_by_<em>name</em></code>.</p>
+
+<h4><code>has_one.name = { class_name = val, foreign_key = val }</code></h4>
+
+<h4><code>has_many.name = { class_name = val }</code></h4>
+
+<h4><code>obj:save()</code></h4>
+
+<p>Saves the object and returns the value of its primary key.</p>
+
+<h2><a name="examples"></a>Examples</h2>
+
+<pre class="example">
+require 'Coat.Persistent'
+
+persistent 'Person'
+
+has_p.name = { is = 'rw', isa = 'string' }
+has_p.age = { is = 'rw', isa = 'number' }
+
+sql_create = [[
+    CREATE TABLE person (
+        id INTEGER,
+        name CHAR(64),
+        age INTEGER
+    )
+]]
+</pre>
+
+<pre class="example">
+local conn = Person.establish_connection('sqlite3', 'test.db')
+conn:execute(Person.sql_create)
+</pre>
+
+<pre class="example">
+Person.create { name = 'John', age = 23 }
+Person.create {
+    { name = 'Brenda', age = 31 }, 
+    { name = 'Nate', age = 34 }, 
+    { name = 'Dave', age = 29 },
+}
+
+for p in Person.find() do
+    print(p.id, p.name, p.age)
+end
+
+p = Person.find_by_name('Brenda')()
+p.age = p.age + 1
+p:save()
+
+p = Person.find(1)()
+p:delete()
+
+for p in Person.find 'age > 30' do
+    print(p.id, p.name, p.age)
+end
+</pre>
+
+</div> <!-- id="content" -->
+
+</div> <!-- id="main" -->
+
+<div id="about">
+</div> <!-- id="about" -->
+
+</div> <!-- id="container" -->
+
+</body>
+</html>
