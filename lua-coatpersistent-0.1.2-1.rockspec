@@ -1,17 +1,17 @@
 -- This file was automatically generated for the LuaDist project.
 
 package = 'lua-CoatPersistent'
-version = '0.1.1-2'
+version = '0.1.2-1'
 -- LuaDist source
 source = {
-  tag = "0.1.1-2",
+  tag = "0.1.2-1",
   url = "git://github.com/LuaDist-testing/lua-coatpersistent.git"
 }
 -- Original source
 -- source = {
---     url = 'http://cloud.github.com/downloads/fperrad/lua-CoatPersistent/lua-coatpersistent-0.1.1.tar.gz',
---     md5 = '0820993c34a867c4c1891bffdd49f65d',
---     dir = 'lua-CoatPersistent-0.1.1',
+--     url = 'http://cloud.github.com/downloads/fperrad/lua-CoatPersistent/lua-coatpersistent-0.1.2.tar.gz',
+--     md5 = '3c3d19aad699f430962167c6db0a908e',
+--     dir = 'lua-CoatPersistent-0.1.2',
 -- }
 description = {
     summary = "an ORM for lua-Coat",
@@ -28,7 +28,7 @@ dependencies = {
     'lua >= 5.1',
     'luasql-sqlite3 >= 2.2.0',
     'dado >= 1.2.0',
-    'lua-coat >= 0.8.5',
+    'lua-coat >= 0.8.6',
     'lua-testmore >= 0.2.3',
 }
 build = {

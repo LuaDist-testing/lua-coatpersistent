@@ -6,10 +6,13 @@ ifndef REV
   REV   := 1
 endif
 
-ifndef DESTDIR
-  DESTDIR := /usr/local
-endif
-LIBDIR  := $(DESTDIR)/share/lua/5.1
+LUAVER  := 5.1
+PREFIX  := /usr/local
+DPREFIX := $(DESTDIR)$(PREFIX)
+LIBDIR  := $(DPREFIX)/share/lua/$(LUAVER)
+
+all: dist.cmake
+	@echo "Nothing to build here, you can just make install"
 
 install:
 	cp src/Coat/Persistent.lua      $(LIBDIR)/Coat
@@ -52,8 +55,11 @@ while (<>) { \
 version:
 	@echo $(VERSION)
 
-CHANGES:
+CHANGES: dist.info
 	perl -i.bak -pe "s{^$(VERSION).*}{q{$(VERSION)  }.localtime()}e" CHANGES
+
+dist.info:
+	perl -i.bak -pe "s{^version.*}{version = \"$(VERSION)\"}" dist.info
 
 tag:
 	git tag -a -m 'tag release $(VERSION)' $(VERSION)
@@ -61,7 +67,10 @@ tag:
 doc:
 	git read-tree --prefix=doc/ -u remotes/origin/gh-pages
 
-MANIFEST: doc
+dist.cmake:
+	wget https://raw.github.com/LuaDist/luadist/master/dist.cmake
+
+MANIFEST: doc dist.cmake
 	git ls-files | perl -e '$(manifest_pl)' > MANIFEST
 
 $(TARBALL): MANIFEST
@@ -106,5 +115,8 @@ clean:
 	rm -rf doc
 	rm -f MANIFEST *.bak *.db src/luacov.*.out src/*.db src/*.png test/*.png *.rockspec README.html
 
-.PHONY: test rockspec CHANGES
+realclean: clean
+	rm -f dist.cmake
+
+.PHONY: test rockspec CHANGES dist.info
 
